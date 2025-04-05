@@ -58,7 +58,7 @@ const System: React.FC = () => {
           roughness,
           textureParams
       });
-  }
+    }
 
     const starFieldRadius = 250;
     for (let i = 0; i < numStars; i++) {
@@ -85,7 +85,7 @@ const System: React.FC = () => {
 
     const sunSize = randomFloat(2.5, 4.5);
     const sunColor = new THREE.Color().setHSL(randomFloat(0.05, 0.15), 1.0, 0.6);
-    const sunIntensity = randomFloat(2.0, 3.5);
+    const sunIntensity = randomFloat(10, 11.5);
 
     return { planets, stars, sunSize, sunColor, sunIntensity };
   }, []);
