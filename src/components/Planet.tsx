@@ -1,56 +1,67 @@
 // src/components/Planet.tsx
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { generatePlanetTexture } from '../utils/generatePlanetTexture'; // Importer le générateur
 
-export interface PlanetData { // Exportons l'interface pour l'utiliser dans System
-    id: string; // Pour la key React
-    color: THREE.Color;
-    size: number;
-    orbitRadius: number;
-    orbitSpeed: number;
-    rotationSpeed: number;
-    initialAngle: number;
-    metalness: number;
-    roughness: number;
+export interface PlanetData {
+  id: string;
+  seed: number; // Ajout d'une seed pour la génération procédurale
+  size: number;
+  orbitRadius: number;
+  orbitSpeed: number;
+  rotationSpeed: number;
+  initialAngle: number;
+  metalness: number; // On garde pour varier l'aspect global
+  roughness: number; // Idem
+  // Optionnel : on pourrait aussi randomiser les params de texture ici
+  textureParams?: Partial<Parameters<typeof generatePlanetTexture>[0]>;
 }
 
-
 const Planet: React.FC<PlanetData> = ({
-  color,
+  seed,
   size,
   orbitRadius,
   orbitSpeed,
   rotationSpeed,
   initialAngle,
   metalness,
-  roughness
+  roughness,
+  textureParams // paramètres optionnels pour la génération
 }) => {
   const meshRef = useRef<THREE.Mesh>(null!);
 
+  // Générer les textures en utilisant useMemo pour ne le faire qu'une fois par seed
+  const { map, bumpMap } = useMemo(() => {
+    console.log(`Generating textures for planet seed: ${seed}`); // Pour vérifier la génération
+    return generatePlanetTexture({
+      seed: seed,
+      ...(textureParams || {}) // Applique les paramètres spécifiques si fournis
+    });
+  }, [seed, textureParams]); // Re-génère si la seed ou les params changent
+
   useFrame((state) => {
+    // ... (logique de mouvement inchangée)
     const time = state.clock.elapsedTime;
     const angle = initialAngle + time * orbitSpeed;
-
-    // Position orbitale
     const x = Math.cos(angle) * orbitRadius;
     const z = Math.sin(angle) * orbitRadius;
     meshRef.current.position.x = x;
     meshRef.current.position.z = z;
-
-    // Rotation sur elle-même
     meshRef.current.rotation.y += rotationSpeed;
   });
 
   return (
     <mesh ref={meshRef}>
-      <sphereGeometry args={[size, 32, 32]} />
-      {/* Matériau avec propriétés aléatoires */}
+      <sphereGeometry args={[size, 64, 64]} /> {/* Augmenter un peu les segments pour la bump map */}
       <meshStandardMaterial
-        color={color}
-        metalness={metalness} // Apparence métallique (0 = diélectrique, 1 = métal)
-        roughness={roughness} // Rugosité de la surface (0 = lisse/miroir, 1 = mat)
-        // envMapIntensity={0.5} // Optionnel: ajoute un peu de réflexion de l'environnement
+        map={map}               // Texture de couleur procédurale
+        bumpMap={bumpMap}       // Texture de relief procédurale
+        bumpScale={0.015 * size} // Échelle du relief (ajuster si besoin), dépendant de la taille
+        metalness={metalness}   // Gardé pour la variation globale
+        roughness={roughness}   // Gardé pour la variation globale
+      // displacementMap={bumpMap} // On *pourrait* utiliser la même texture pour déplacer la géométrie
+      // displacementScale={0.1 * size} // Mais bumpMap est moins coûteux
       />
     </mesh>
   );
