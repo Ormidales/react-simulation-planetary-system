@@ -7,7 +7,6 @@ import Star from './Star';
 
 const randomFloat = (min: number, max: number): number => Math.random() * (max - min) + min;
 const randomInt = (min: number, max: number): number => Math.floor(randomFloat(min, max + 1));
-const randomColor = (): THREE.Color => new THREE.Color(Math.random(), Math.random(), Math.random());
 
 const Loader: React.FC = () => null;
 
