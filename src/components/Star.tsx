@@ -1,4 +1,3 @@
-// src/components/Star.tsx
 import React, { useMemo } from 'react';
 import * as THREE from 'three';
 
@@ -11,8 +10,8 @@ interface StarProps {
 const Star: React.FC<StarProps> = ({ position, size, color }) => {
   return (
     <mesh position={position}>
-      <sphereGeometry args={[size, 8, 8]} /> {/* Géométrie simple */}
-      <meshBasicMaterial color={color} transparent opacity={0.8} /> {/* Auto-illuminé */}
+      <sphereGeometry args={[size, 8, 8]} />
+      <meshBasicMaterial color={color} transparent opacity={0.8} />
     </mesh>
   );
 };
